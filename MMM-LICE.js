@@ -11,7 +11,7 @@ Module.register("MMM-LICE", {
 		accessKey: "",       // Free account & API Access Key at currencylayer.com
 	    source: "USD",       // USD unless you upgrade from free plan
 		symbols: "",         // Add in config file
-        useHeader: false,    // true if you want a header      
+        useHeader: false,    // true if you want a header
         header: "",          // Any text you want. useHeader must be true
         maxWidth: "300px",
         animationSpeed: 3000,
@@ -29,18 +29,20 @@ Module.register("MMM-LICE", {
         return ["moment.js"];
     },
 
-		
+
 	start: function() {
         Log.info("Starting module: " + this.name);
 
         requiresVersion: "2.1.0",
 
         //  Set locale.
-        this.url = "http://apilayer.net/api/live?access_key=" + this.config.accessKey + "&currencies=" + this.config.symbols + "&source=" + this.config.source + "&format=1";
+        this.url = "http://api.fixer.io/latest?base=" + this.config.source
+        //this.url = "https://openexchangerates.org/api/latest.json?app_id="+this.config.accessKey+"&base="+this.config.source
+        //this.url = ""http://apilayer.net/api/live?access_key=" + this.config.accessKey + "&currencies=" + this.config.symbols + "&source=" + this.config.source + "&format=1";
         this.LICE = {};
         this.scheduleUpdate();
     },
-	
+
 
     getDom: function() {
 
@@ -49,7 +51,7 @@ Module.register("MMM-LICE", {
         wrapper.style.maxWidth = this.config.maxWidth;
 
         if (!this.loaded) {
-            wrapper.innerHTML = this.translate("Show me the money . . .");
+            wrapper.innerHTML = this.translate("正在加载汇率资讯...");
             wrapper.classList.add("bright", "light", "small");
             return wrapper;
         }
@@ -62,7 +64,7 @@ Module.register("MMM-LICE", {
         }
 
         var LICE = this.LICE;
-		
+
 
         var top = document.createElement("div");
         top.classList.add("list-row");
@@ -71,38 +73,36 @@ Module.register("MMM-LICE", {
         // timestamp
         var timestamp = document.createElement("div");
         timestamp.classList.add("xsmall", "bright", "timestamp");
-        timestamp.innerHTML = "Rate as of " + moment.unix(LICE.timestamp).format('h:mm a') + " today";
+        timestamp.innerHTML = "截止至 " + LICE.date + " 的汇率";
         wrapper.appendChild(timestamp);
 
 
         // source currency
         var source = document.createElement("div");
         source.classList.add("xsmall", "bright", "source");
-        source.innerHTML = "Source Currency = " + this.config.source;
+        source.innerHTML = "币种 ： " + this.config.source;
         wrapper.appendChild(source);
-		
-		
+
+
 		// this gets the key from the key/pair of the element (hasOwnProperty)
-		for (var Key in LICE.quotes) {
-		if (LICE.quotes.hasOwnProperty(Key)) {
-	
-		
+		for (var Key in this.config.symbols) {
+		if (LICE.rates.hasOwnProperty(this.config.symbols[Key])) {
+
 	//// Learned this on jsfiddle. HOORAY!
 	//// This dynamically creates the div/tags for each element of LICE.quotes
-		var symbols = LICE.quotes;
-		for (var c in symbols) {
-		
-			var newElement = document.createElement("div");
-			newElement.classList.add("xsmall", "bright", "symbol");
-			newElement.innerHTML += Key + ' = '+ LICE.quotes[Key]; // + " = " + symbols[c];
-			}
+		  var symbols = LICE.rates;
+		    for (var c in symbols) {
+          var newElement = document.createElement("div");
+			    newElement.classList.add("xsmall", "bright", "symbol");
+			    newElement.innerHTML += "1 "+this.config.source+" = "+symbols[this.config.symbols[Key]] + " "+this.config.symbols[Key]; // + " = " + symbols[c];
+		    }
 		}
 			wrapper.appendChild(newElement);
-			
+
 	} // <-- closes key/pair loop
-		
+
         return wrapper;
-		
+
     }, // closes getDom
 
 
